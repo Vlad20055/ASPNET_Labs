@@ -1,0 +1,16 @@
+﻿@{
+    var currentArea = ViewContext.RouteData.Values["area"]?.ToString();
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<div class="navbar-nav">
+    <a class="nav-item nav-link @(currentController == "Home" ? "active" : "")"
+       asp-controller="Home" asp-action="Index">Лб1</a>
+
+    <a class="nav-item nav-link @(currentController == "Fish" ? "active" : "")"
+       asp-controller="Product" asp-action="Index">Каталог</a>
+
+    <a class="nav-item nav-link @(currentController == "Index" ? "active" : "")"
+       asp-area="Admin" asp-page="/Index">Администрирование</a>
+</div>

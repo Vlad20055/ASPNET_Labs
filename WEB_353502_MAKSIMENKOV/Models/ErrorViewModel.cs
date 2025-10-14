@@ -1,4 +1,4 @@
-namespace WEB_353502_MAKSIMENKOV.Models
+namespace UI.Models
 {
     public class ErrorViewModel
     {

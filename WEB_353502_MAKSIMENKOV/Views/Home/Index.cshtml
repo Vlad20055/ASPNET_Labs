@@ -2,21 +2,23 @@
     ViewBag.Title = "Index";
 }
 
-<div class="row mb-4">
-    <div class="col">
-        <h2 class="fw-bold">Лабораторная работа 1</h2>
-    </div>
-</div>
+<div class="row mb-4"> 
+     <div class="col">
+        <h1>@ViewData["TitleText"]</h1>
+     </div> 
+ </div>
+
+
 
 <!-- Упорядоченный список с заглавными буквами -->
 <div class="row mb-4">
     <div class="col">
         <h4><b>Список</b></h4>
-        <ol type="A" class="fs-5">
-            <li>Первый элемент списка</li>
-            <li>Второй элемент списка</li>
-            <li>Третий элемент списка</li>
-            <li>Четвертый элемент списка</li>
+        <ol type="A">
+            @for (int i = 0; i < 5; i++)
+            {
+                <li>Элемент @i списка</li>
+            }
         </ol>
     </div>
 </div>
@@ -91,6 +93,13 @@
             <input type="password" class="form-control" name="inputPassword" id="inputPassword">
         </div>
     </div> <!-- Password -->
+
+    <div class="mb-3">
+        <label for="demoSelect" class="form-label">Выберите вариант</label>
+        <select class="form-select" id="demoSelect" name="selectedId" asp-items="@(ViewData["SelectListItems"] as IEnumerable<SelectListItem>)">
+            <option value="">Выберите вариант</option>
+        </select>
+    </div>
 
     <button type="submit" class="btn btn-primary" name="submitButton">Отправить</button>
 
