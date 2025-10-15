@@ -2,12 +2,16 @@
 
 public class MemoryProductService : IProductService
 {
+    private readonly IConfiguration _config;
+    private readonly ICategoryService _categoryService;
     private readonly List<Product> _products;
     private readonly List<Category> _categories;
 
-    public MemoryProductService(ICategoryService categoryService)
+    public MemoryProductService(IConfiguration config, ICategoryService categoryService)
     {
-        // Получаем список категорий из другого сервиса
+        _config = config;
+        _categoryService = categoryService;
+
         _categories = categoryService
             .GetCategoryListAsync()
             .Result
@@ -79,39 +83,29 @@ public class MemoryProductService : IProductService
         };
     }
 
-    // На данном этапе реализуем только GetProductListAsync
     public Task<ResponseData<ListModel<Product>>> GetProductListAsync(string? categoryNormalizedName, int pageNo = 1)
     {
-        // Количество элементов на странице (если потом понадобится пагинация)
-        const int pageSize = 10;
+        int pageSize = _config.GetValue<int>("ItemsPerPage", 3);
 
-        // Фильтрация по категории, если указано имя категории
-        var query = _products.AsQueryable();
+        IEnumerable<Product> query = _products;
 
         if (!string.IsNullOrEmpty(categoryNormalizedName))
         {
-            var category = _categories
-                .FirstOrDefault(c => c.NormalizedName == categoryNormalizedName);
-
-            if (category != null)
-                query = query.Where(p => p.CategoryID == category.Id);
-            else
-                return Task.FromResult(
-                    ResponseData<ListModel<Product>>.Error($"Категория '{categoryNormalizedName}' не найдена")
-                );
+            var cat = _categories.FirstOrDefault(c => c.NormalizedName == categoryNormalizedName);
+            if (cat != null)
+                query = query.Where(p => p.CategoryID == cat.Id);
         }
 
-        // Всего страниц (на случай будущей пагинации)
-        var totalItems = query.Count();
-        var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+        int totalItems = query.Count();
+        int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+        if (pageNo < 1) pageNo = 1;
+        if (pageNo > totalPages) pageNo = totalPages;
 
-        // Выбираем текущую страницу
         var items = query
             .Skip((pageNo - 1) * pageSize)
             .Take(pageSize)
             .ToList();
 
-        // Создаём модель для ответа
         var model = new ListModel<Product>
         {
             Items = items,
@@ -119,8 +113,8 @@ public class MemoryProductService : IProductService
             TotalPages = totalPages
         };
 
-        // Возвращаем успешный результат
-        return Task.FromResult(ResponseData<ListModel<Product>>.Success(model));
+        var response = ResponseData<ListModel<Product>>.Success(model);
+        return Task.FromResult(response);
     }
 
 
